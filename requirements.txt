@@ -1,0 +1,7 @@
+mplsoccer
+matplotlib
+numpy
+pandas
+polars
+scikit-learn
+
