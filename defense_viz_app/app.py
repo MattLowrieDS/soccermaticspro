@@ -95,40 +95,12 @@ def load_data() -> pl.DataFrame:
     """
     data_path = "data/data.parquet"
     if not os.path.exists(data_path):
-        st.error(f"Data file not found at {data_path}")
-        return pl.DataFrame()
+        data_path = "defense_viz_app/data/data.parquet"
+        if not os.path.exists(data_path):
+            st.error(f"Data file not found at {data_path}")
+            return pl.DataFrame()
 
     df = pl.read_parquet(data_path)
-
-    # Ensure home_team_score, away_team_score, and date exist in the dataframe
-    if "home_team_score" not in df.columns or "date" not in df.columns:
-        meta_dir = "../Skillcorner data/RealMadrid/meta"
-        scores_home = []
-        scores_away = []
-        dates = []
-
-        for row in df.iter_rows(named=True):
-            m_id = row["match_id"]
-            meta_path = os.path.join(meta_dir, f"{m_id}.json")
-            if os.path.exists(meta_path):
-                import json
-                with open(meta_path) as f:
-                    meta = json.load(f)
-                    scores_home.append(meta.get("home_team_score", 0))
-                    scores_away.append(meta.get("away_team_score", 0))
-                    dt = meta.get("date_time", "")
-                    dates.append(dt.split("T")[0] if "T" in dt else dt)
-            else:
-                scores_home.append(0)
-                scores_away.append(0)
-                dates.append("")
-
-        df = df.with_columns([
-            pl.Series("home_team_score", scores_home, dtype=pl.Int64),
-            pl.Series("away_team_score", scores_away, dtype=pl.Int64),
-            pl.Series("date", dates, dtype=pl.String),
-        ])
-
     df = df.with_columns(
         hover_info=(
             pl.col("home_team")
@@ -311,6 +283,9 @@ def main():
             goals = row.get("rma_goals", 0)
 
         pitch_file = f"pitch_plots/{active_match_id}.png"
+        if not os.path.exists(pitch_file):
+            pitch_file = f"defense_viz_app/pitch_plots/{active_match_id}.png"
+
         if os.path.exists(pitch_file):
             st.image(
                 pitch_file,
