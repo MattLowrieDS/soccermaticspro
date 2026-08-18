@@ -86,6 +86,7 @@ st.markdown("""
 </style>
 """, unsafe_allow_html=True)
 
+PROJ_PATH_PROD = "project_3/defense_viz_app"
 
 @st.cache_data
 def load_data() -> pl.DataFrame:
@@ -93,9 +94,10 @@ def load_data() -> pl.DataFrame:
     Reads match data from data/data.parquet into a Polars DataFrame.
     Enriches with scores and date if not present.
     """
+    # Check local first for local deployments
     data_path = "data/data.parquet"
     if not os.path.exists(data_path):
-        data_path = "defense_viz_app/data/data.parquet"
+        data_path = f"{PROJ_PATH_PROD}/data/data.parquet"
         if not os.path.exists(data_path):
             st.error(f"Data file not found at {data_path}")
             return pl.DataFrame()
@@ -284,7 +286,7 @@ def main():
 
         pitch_file = f"pitch_plots/{active_match_id}.png"
         if not os.path.exists(pitch_file):
-            pitch_file = f"defense_viz_app/pitch_plots/{active_match_id}.png"
+            pitch_file = f"{PROJ_PATH_PROD}/pitch_plots/{active_match_id}.png"
 
         if os.path.exists(pitch_file):
             st.image(
